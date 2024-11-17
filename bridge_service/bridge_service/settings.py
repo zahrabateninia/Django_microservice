@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 
-HARD_CODED_TOKEN = "it_is-secure-token"
+HARD_CODED_TOKEN = "it-is-secure-token"
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
