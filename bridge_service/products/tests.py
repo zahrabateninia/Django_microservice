@@ -70,12 +70,10 @@ class ProductsViewTests(APITestCase):
 
         # Assert that the response status code is 404 (Not Found)
         self.assertEqual(response.status_code, 404)
-
-        # Optionally, check the error message
         self.assertEqual(response.json()['error'], 'Product not found.')
 
     @patch('requests.get')
-    def test_fetch_all_products_unauthorized(self, mock_get):
+    def test_fetch_all_products_missing_token(self, mock_get):
         mock_get.return_value.json.return_value = [
             {"id": 1, "name": "Product 1", "price": 20.0},
             {"id": 2, "name": "Product 2", "price": 30.0}
@@ -84,7 +82,27 @@ class ProductsViewTests(APITestCase):
         # Make the GET request without the Authorization header
         response = self.client.get('/api/products/')
 
-        # 403 (Forbidden)
         self.assertEqual(response.status_code, 403)
 
-        self.assertEqual(response.json()['detail'], 'Authentication credentials were not provided.')
+        # Assert that the response contains the 'error' key and check its value
+        self.assertIn('error', response.json())
+        self.assertEqual(response.json()['error'], 'Forbidden: Invalid token.')
+
+    @patch('requests.get')
+    def test_fetch_all_products_invalid_token(self, mock_get):
+        mock_get.return_value.json.return_value = [
+            {"id": 1, "name": "Product 1", "price": 20.0},
+            {"id": 2, "name": "Product 2", "price": 30.0}
+        ]
+
+        headers = {
+            "Authorization": "Bearer invalid-token"
+        }
+
+        response = self.client.get('/api/products/', headers=headers)
+
+        self.assertEqual(response.status_code, 403)
+
+        # Assert that the response contains the 'error' key and check its value
+        self.assertIn('error', response.json())
+        self.assertEqual(response.json()['error'], 'Forbidden: Invalid token.')
