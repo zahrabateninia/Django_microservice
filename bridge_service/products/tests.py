@@ -74,3 +74,17 @@ class ProductsViewTests(APITestCase):
         # Optionally, check the error message
         self.assertEqual(response.json()['error'], 'Product not found.')
 
+    @patch('requests.get')
+    def test_fetch_all_products_unauthorized(self, mock_get):
+        mock_get.return_value.json.return_value = [
+            {"id": 1, "name": "Product 1", "price": 20.0},
+            {"id": 2, "name": "Product 2", "price": 30.0}
+        ]
+
+        # Make the GET request without the Authorization header
+        response = self.client.get('/api/products/')
+
+        # 403 (Forbidden)
+        self.assertEqual(response.status_code, 403)
+
+        self.assertEqual(response.json()['detail'], 'Authentication credentials were not provided.')
